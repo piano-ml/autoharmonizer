@@ -1,5 +1,6 @@
 import os
 import pickle
+import tarfile
 import numpy as np
 from copy import deepcopy
 from tqdm import trange
@@ -21,63 +22,98 @@ def quant_score(score):
 
 
 def get_filenames(input_dir):
-    
-    filenames = []
 
-    # Traverse the path
-    for dirpath, dirlist, filelist in os.walk(input_dir):
-        # Traverse the list of files
-        for this_file in filelist:
-            # Ensure that suffixes in the training set are valid
-            if input_dir==DATASET_PATH and os.path.splitext(this_file)[-1] not in EXTENSION:
-                continue
-            filename = os.path.join(dirpath, this_file)
-            filenames.append(filename)
+    # Automatic Dataset Extraction
+    if input_dir == DATASET_PATH and not os.path.exists(input_dir):
+        archive_name = DATASET_ARCHIVE
+        if os.path.exists(archive_name):
+            print(f"[LOADER] Dataset folder not found. Extracting {archive_name}...")
+            try:
+                # Check structure
+                has_root = False
+                with tarfile.open(archive_name, "r:gz") as tar:
+                    m = tar.next()
+                    if m and m.name.startswith("dataset"):
+                        has_root = True
+                
+                # Extract
+                with tarfile.open(archive_name, "r:gz") as tar:
+                    if has_root:
+                         tar.extractall(path=".")
+                    else:
+                         os.makedirs(input_dir, exist_ok=True)
+                         tar.extractall(path=input_dir)
+                print("[LOADER] Extraction complete.")
+            except Exception as e:
+                print(f"[LOADER] Error extracting dataset: {e}")
     
+    # Use list comprehension for better performance
+    filenames = [
+        os.path.join(dirpath, this_file)
+        for dirpath, dirlist, filelist in os.walk(input_dir)
+        for this_file in filelist
+        if input_dir != DATASET_PATH or os.path.splitext(this_file)[-1] in EXTENSION
+    ]
     return filenames
 
 
 def melody_reader(score):
-
-    melody_txt = []
-    beat_txt = []
-    chord_txt = []
-    key_txt = []
+    # Pre-calculate total length for efficient memory allocation
+    total_length = 0
+    elements_data = []
     sharps = 0
     chord_token = 'R'
-
+    
     for element in score.flat:
-
         if isinstance(element, note.Note):
-            # midi pitch as note onset
             token = element.pitch.midi
-
+            duration = int(element.quarterLength*4)
+            beat = int(element.beatStrength*4)
+            if duration > 0:  # Skip zero-length notes
+                elements_data.append((token, beat, sharps, chord_token, duration))
+                total_length += duration
+            
         elif isinstance(element, note.Rest):
-            # 0 as rest onset
             token = 0
+            duration = int(element.quarterLength*4)
+            beat = int(element.beatStrength*4)
+            if duration > 0:  # Skip zero-length rests
+                elements_data.append((token, beat, sharps, chord_token, duration))
+                total_length += duration
             
         elif isinstance(element, chord.Chord) and not isinstance(element, harmony.ChordSymbol):
             notes = [n.pitch.midi for n in element.notes]
-            notes.sort()
-            token = notes[-1]
+            if notes:  # Ensure there are notes
+                token = max(notes)  # max() is faster than sort() + [-1]
+                duration = int(element.quarterLength*4)
+                beat = int(element.beatStrength*4)
+                if duration > 0:  # Skip zero-length chords
+                    elements_data.append((token, beat, sharps, chord_token, duration))
+                    total_length += duration
             
         elif isinstance(element, harmony.ChordSymbol):
             chord_token = element.figure
-            continue
-        
+            
         elif isinstance(element, key.Key) or isinstance(element, key.KeySignature):
             sharps = element.sharps+8
-            continue
-            
-        else:
-            continue
-        
-        melody_txt += [token]*int(element.quarterLength*4)
-        beat_txt += [int(element.beatStrength*4)]*int(element.quarterLength*4)
-        key_txt += [sharps]*int(element.quarterLength*4)
-        chord_txt += [chord_token]*int(element.quarterLength*4)
-
-    return melody_txt, beat_txt, key_txt, chord_txt
+    
+    # Preallocate arrays with appropriate dtypes
+    melody_txt = np.zeros(total_length, dtype=np.uint8)
+    beat_txt = np.zeros(total_length, dtype=np.uint8)
+    key_txt = np.zeros(total_length, dtype=np.uint8)
+    chord_txt = []
+    
+    # Fill arrays efficiently
+    idx = 0
+    for token_val, beat_val, key_val, chord_val, duration in elements_data:
+        melody_txt[idx:idx+duration] = token_val
+        beat_txt[idx:idx+duration] = beat_val
+        key_txt[idx:idx+duration] = key_val
+        chord_txt.extend([chord_val] * duration)
+        idx += duration
+    
+    # Convert to lists for compatibility with existing code
+    return melody_txt.tolist(), beat_txt.tolist(), key_txt.tolist(), chord_txt
 
 
 def convert_files(filenames, fromDataset=True):
@@ -145,8 +181,16 @@ def convert_files(filenames, fromDataset=True):
         chord_types = [song[3] for songs in data_corpus for song in songs]
         chord_types = [item for sublist in chord_types for item in sublist]
         chord_types = list(set(chord_types))
-        chord_types.remove('R')
-        chord_types = ['R']+chord_types
+        
+        # Only remove 'R' if it exists in the list
+        if 'R' in chord_types:
+            chord_types.remove('R')
+            chord_types = ['R'] + chord_types
+        elif len(chord_types) == 0:
+            # If no chord types found, use default
+            chord_types = ['R']
+        
+        print(f"Found {len(chord_types)} unique chord types")
 
         with open(CHORD_TYPES_PATH, "wb") as filepath:
             pickle.dump(chord_types, filepath)
@@ -159,6 +203,16 @@ def convert_files(filenames, fromDataset=True):
 
 
 if __name__ == '__main__':
+
+    # Clean up old artifacts to ensure fresh training data
+    print("[LOADER] Cleaning up old binary files and weights...")
+    for path in [CORPUS_PATH, CHORD_TYPES_PATH, WEIGHTS_PATH]:
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+                print(f"  - Deleted {path}")
+            except OSError as e:
+                print(f"  - Error deleting {path}: {e}")
 
     filenames = get_filenames(input_dir=DATASET_PATH)
     convert_files(filenames)
