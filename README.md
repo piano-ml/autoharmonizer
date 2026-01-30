@@ -6,7 +6,7 @@ This work is an adaptation to be integrated in https://pianoml.org.
 
 This work is derived from original paper: [arXiv paper](https://arxiv.org/abs/2112.11122). by Shangda Wu, Yue Yang, Zhaowen Wang, Xiaobing Li, Maosong Sun and a fork of the original repository available at https://github.com/sander-wood/autoharmonizer
 
-
+See [UPGRADE_NOTES](UPGRADE_NOTES.md) for changes made to the original project.
 
   
 ## Install
