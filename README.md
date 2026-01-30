@@ -1,7 +1,7 @@
 
 # Generating Chords from Melody with Flexible Harmonic Rhythm and Controllable Harmonic Density
 
-This is the source code of AutoHarmonizer2 a harmonic density-controllable melody harmonization system with flexible harmonic rhythm, trained/validated on Wikifonia.org's lead sheet dataset.  
+This is the source code of AutoHarmonizer2 an harmonic density-controllable melody harmonization system with flexible harmonic rhythm, trained/validated on Wikifonia.org's lead sheet dataset.  
   
 This work is an adaptation to be integrated in https://pianoml.org.
 
