@@ -1,3 +1,4 @@
+
 # Generating Chords from Melody with Flexible Harmonic Rhythm and Controllable Harmonic Density
 
 This is the source code of AutoHarmonizer2 a harmonic density-controllable melody harmonization system with flexible harmonic rhythm, trained/validated on Wikifonia.org's lead sheet dataset.  
@@ -5,6 +6,34 @@ This is the source code of AutoHarmonizer2 a harmonic density-controllable melod
 This work is an adaptation to be integrated in https://pianoml.org.
 
 This work is derived from original paper: [arXiv paper](https://arxiv.org/abs/2112.11122). by Shangda Wu, Yue Yang, Zhaowen Wang, Xiaobing Li, Maosong Sun and a fork of the original repository available at https://github.com/sander-wood/autoharmonizer
+
+
+
+### What is harmonization?
+
+Harmonization is the process of creating or adding chords (and sometimes voice-leading) that support a given melody in a musically coherent and stylistically appropriate way.  
+In practice it means: given a single-line melody (or a lead sheet with melody + chords symbols), produce a full harmonic accompaniment — usually 3–4 voices — that sounds natural in a chosen style (classical, jazz, pop, baroque chorale, etc.).
+
+### Why is harmonization difficult?
+
+Even for experienced musicians, good harmonization is hard because it simultaneously requires solving many interdependent constraints:
+
+- harmonic correctness (functional harmony, chord grammar of the style)
+- voice-leading rules (smooth motion, avoid forbidden parallels, proper resolution of dissonances)
+- melodic contour preservation (the original tune must still feel like the most important line)
+- style & idiom (baroque ≠ romantic ≠ bebop ≠ modern pop)
+- balance between surprise & predictability
+- avoiding overused or cliché progressions when not wanted
+- handling modulations, secondary functions, chromaticism, modal mixture…
+
+Humans develop an intuition for these trade-offs over many years. Teaching a machine to make similar aesthetic decisions — without overfitting to one narrow style or producing bland “textbook” results — is currently one of the most challenging open problems in symbolic music generation.
+
+
+## Repository Status
+
+This project builds upon and enhances the excellent original work, with the goal of making it ready for integration into the open-source https://pianoml.org library.
+
+
 
 See [UPGRADE_NOTES](UPGRADE_NOTES.md) for changes made to the original project.
 
