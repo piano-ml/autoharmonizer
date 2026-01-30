@@ -38,17 +38,19 @@ After that, you can use `harmonizer.py` to harmonize music with chord progressio
   
 If you need to finetune the parameters, you can do so in `config.py`. It is not recommended to change the parameters in other files.
 
+
 ## Model performance
 
 | Best Val Loss | Train Loss @ Best | Best Val Acc | Train Acc @ Best | Best Epoch |
 |---------------|-------------------|--------------|------------------|------------|
 | 0.41651       | 0.36988           | 0.93393      | 0.92914          | 3          |
 
-
-- Validation Loss of 0.41651 reasonable for  NLL harmonization
+- Validation Loss of 0.41651 reasonable for NLL harmonization
 - train is still noticeably better than val (gap ~0.047)
 - 93.393% impressive accuracy
 - val acc > train acc (by ~0.48%)
+
+![Training history](training_history.png)
 
 ## Bibliography
 
