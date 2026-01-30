@@ -1,15 +1,15 @@
 # requirements.txt:
 
-# Core ML stack
-tensorflow==2.14.0
-keras==2.14.0
-tensorflow-addons==0.23.0
+# Core ML stack - Modern TensorFlow with numpy2 support
+tensorflow>=2.18.0
+numpy>=2.0.0
 
 # Music processing
-music21==7.3.3
+music21>=9.1.0
 
 # Utility
-tqdm==4.66.1
+tqdm>=4.66.1
 
 # Optional: your custom or local package
 samplings  # replace with exact version or local path if needed
+matplotlib

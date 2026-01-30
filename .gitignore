@@ -116,3 +116,10 @@ docker-compose.override.yml
 # VS Code debug
 .vscode/launch.json
 .vscode/settings.json
+
+
+# project specific ignores
+chord_types.bin
+data_corpus.bin
+weights.keras
+dataset/*
