@@ -49,9 +49,3 @@
 - **Code repo**:
   - git repository with non essentials artefacts (.bin) + generation workflow as code0
   - migrate dataset to .tgz
-
-
-
-
-
-

@@ -119,7 +119,6 @@ docker-compose.override.yml
 
 
 # project specific ignores
-chord_types.bin
 data_corpus.bin
 weights.keras
 !weights.keras.zip
